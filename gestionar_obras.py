@@ -1,1 +1,0 @@
-# definición de la clase abstracta “GestionarObra”

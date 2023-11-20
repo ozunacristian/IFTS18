@@ -9,7 +9,7 @@ def conectar_db():
       print("Error al conectar con la BD.", e)
       exit()
 
-# función que mapea las tablas de la base de datos en donde se ingresará el dataset.
+# función que mapea y crea las tablas de la base de datos en donde se ingresará el dataset limpio.
 def mapear_orm():
   class BaseModel(Model):
     class Meta:
@@ -98,5 +98,5 @@ def mapear_orm():
     class Meta:
         db_table = 'ObraUrbana'
 
-# Creamos todas las tablas
-sqlite_db.create_tables([Etapa, TipoObra, AreaResponsable, Comuna, Barrio, ContratacionTipo, ObraUrbana])
+  # Creamos todas las tablas
+  sqlite_db.create_tables([Etapa, TipoObra, AreaResponsable, Comuna, Barrio, ContratacionTipo, ObraUrbana])
