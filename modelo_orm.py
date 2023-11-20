@@ -1,6 +1,6 @@
 from peewee import *
 
-# función que conecta la base de dato con control de excepción.
+# función que conecta la base de datos con control de excepción.
 def conectar_db():
   sqlite_db = SqliteDatabase('obras_urbanas.db', pragmas={'journal_mode': 'wal'})
   try:
@@ -90,7 +90,7 @@ def mapear_orm():
     cuit_contratista = IntegerField()
     mano_obra = IntegerField()
     destacada = BooleanField()
-    expediente_numero = CharField(50)
+    expediente_numero = CharField(100)
     financiamiento = CharField(50)
 
     def __str__(self):
