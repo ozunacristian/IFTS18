@@ -1,5 +1,5 @@
 class Obra:
-  def __init__():
+  def __init__(self):
     self.entorno
     self.etapa
     self.tipo_obra

@@ -1,10 +1,12 @@
 from peewee import *
 
+sqlite_db = None
 # función que conecta la base de datos con control de excepción.
 def conectar_db():
   sqlite_db = SqliteDatabase('obras_urbanas.db', pragmas={'journal_mode': 'wal'})
   try:
       sqlite_db.connect()
+      print("Base de datos fué conectada.")
   except OperationalError as e:
       print("Error al conectar con la BD.", e)
       exit()
@@ -16,55 +18,54 @@ def mapear_orm():
         database = sqlite_db
 
     # -----------------------------Tablas de consulta (lookups) -------------------------
-    class Etapa(BaseModel):
-      ID_ETAPA = AutoField() # a definir
-      nombre_etapa = CharField(unique=True)
-      def __str__(self):
-        return self.nombre_etapa
-      class Meta:
-        db_table = 'Etapa'
-        
-    class TipoObra(BaseModel):
-      ID_TIPO = AutoField() # a definir
-      tipo_obra = CharField(unique=True)
-      def __str__(self):
-        return self.nombre_etapa
-      class Meta:
-        db_table = 'TipoObra'
-        
-    class AreaResponsable(BaseModel):
-      ID_AREA_RESPONSABLE = AutoField() # a definir
-      nombre_area = CharField(unique=True)
-      def __str__(self):
-        return self.nombre_etapa
-      class Meta:
-        db_table = 'AreaResponsable'
+  class Etapa(BaseModel):
+    ID_ETAPA = AutoField() # a definir
+    nombre_etapa = CharField(unique=True)
+    def __str__(self):
+      return self.nombre_etapa
+    class Meta:
+      db_table = 'Etapa'
+      
+  class TipoObra(BaseModel):
+    ID_TIPO = AutoField() # a definir
+    tipo_obra = CharField(unique=True)
+    def __str__(self):
+      return self.tipo_obra
+    class Meta:
+      db_table = 'TipoObra'
+      
+  class AreaResponsable(BaseModel):
+    ID_AREA_RESPONSABLE = AutoField() # a definir
+    nombre_area = CharField(unique=True)
+    def __str__(self):
+      return self.nombre_area
+    class Meta:
+      db_table = 'AreaResponsable'
 
-    class Comuna(BaseModel):
-      ID_COMUNA = AutoField() # a definir
-      nombre_comuna = CharField(unique=True)
-      def __str__(self):
-        return self.nombre_comuna
-      class Meta:
-        db_table = 'Comuna'
+  class Barrio(BaseModel):
+    ID_BARRIO = AutoField() # a definir
+    nombre_barrio = CharField(unique=True)
+    def __str__(self):
+      return self.nombre_barrio
+    class Meta:
+      db_table = 'Barrio'
 
-    class Barrio(BaseModel):
-      ID_BARRIO = AutoField() # a definir
-      nombre_barrio = CharField(unique=True)
-      def __str__(self):
-        return self.nombre_barrio
-      class Meta:
-        db_table = 'Barrio'
+  class Comuna(BaseModel):
+    ID_COMUNA = AutoField() # a definir
+    nombre_comuna = CharField(unique=True)
+    barrio = ForeignKeyField(Barrio, backref= 'comuna') # Analizar esto
+    def __str__(self):
+      return self.nombre_comuna
+    class Meta:
+      db_table = 'Comuna'
 
-    class ContratacionTipo(BaseModel):
-      ID_TIPO_CONTRATACION = AutoField() # a definir
-      contratacion = CharField(unique=True)
-      def __str__(self):
-        return self.contratacion
-      class Meta:
-        db_table = 'TipoContratacion'
-
-
+  class ContratacionTipo(BaseModel):
+    ID_TIPO_CONTRATACION = AutoField() # a definir
+    contratacion = CharField(unique=True)
+    def __str__(self):
+      return self.contratacion
+    class Meta:
+      db_table = 'TipoContratacion'
 
   # -------------------------------Tabla principal--------------------------
   class ObraUrbana(BaseModel):
@@ -77,6 +78,7 @@ def mapear_orm():
     descripcion = CharField(500)
     monto_contrato = IntegerField(20)
     FK_comuna = ForeignKeyField(Comuna, backref = 'obra_urbana')
+    FK_barrio = ForeignKeyField(Barrio, BackrefAccessor='obra_urbana') # Analizar mejor : deberíamos poder responder ¿cuántos barrios por comuna?
     direccion = CharField(200)
     fecha_inicio = DateField()
     fecha_fin_inicial = DateField()
