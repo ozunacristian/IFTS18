@@ -2,7 +2,7 @@ from peewee import *
 
 sqlite_db = None
 # función que conecta la base de datos con control de excepción.
-def conectar_db():
+def funcion_conectar_db():
   sqlite_db = SqliteDatabase('obras_urbanas.db', pragmas={'journal_mode': 'wal'})
   try:
       sqlite_db.connect()
@@ -12,7 +12,7 @@ def conectar_db():
       exit()
 
 # función que mapea y crea las tablas de la base de datos en donde se ingresará el dataset limpio.
-def mapear_orm():
+def funcion_mapear_orm():
   class BaseModel(Model):
     class Meta:
         database = sqlite_db
@@ -42,6 +42,14 @@ def mapear_orm():
     class Meta:
       db_table = 'AreaResponsable'
 
+  class Comuna(BaseModel):
+    ID_COMUNA = AutoField() # a definir
+    nombre_comuna = CharField(unique=True)
+    def __str__(self):
+      return self.nombre_comuna
+    class Meta:
+      db_table = 'Comuna'
+
   class Barrio(BaseModel):
     ID_BARRIO = AutoField() # a definir
     nombre_barrio = CharField(unique=True)
@@ -49,15 +57,6 @@ def mapear_orm():
       return self.nombre_barrio
     class Meta:
       db_table = 'Barrio'
-
-  class Comuna(BaseModel):
-    ID_COMUNA = AutoField() # a definir
-    nombre_comuna = CharField(unique=True)
-    barrio = ForeignKeyField(Barrio, backref= 'comuna') # Analizar esto
-    def __str__(self):
-      return self.nombre_comuna
-    class Meta:
-      db_table = 'Comuna'
 
   class ContratacionTipo(BaseModel):
     ID_TIPO_CONTRATACION = AutoField() # a definir
