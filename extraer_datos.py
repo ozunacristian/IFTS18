@@ -1,18 +1,19 @@
 # -*- coding: utf-8 -*-
 #@author: Barnes Lopez - Muñoz - Ozuna - Roel - Velarde
-
 import pandas as pd
 import unicodedata
 import re
 
 df = None
 def funcion_extraer_datos():
+    global df
     try:
-        df = pd.read_csv('obras_urbanas.csv', encoding = 'UTF-8')
+        df = pd.read_csv('observatorio-de-obras-urbanas.csv', encoding = 'UTF-8')
     except Exception as e:
         print("Error al extraer datos ,", e)
 
 def funcion_limpiar():
+    global df
     # Eliminamos las columnas que no vamos a utilizar
     df = df.drop(columns=["ID", "lat", "lng", "imagen_2", "imagen_3", "imagen_4", "beneficiarios", "compromiso", "ba_elige", "link_interno", "pliego_descarga", "estudio_ambiental_descarga"])
 
@@ -252,8 +253,4 @@ def funcion_limpiar():
     df["financiamiento"] = df["financiamiento"].fillna("No especifica")
     df['financiamiento'] = df['financiamiento'].astype(str)
 
-    # Reemplaza 'ruta/del/nuevo/archivo.csv' con la ruta y nombre de archivo deseados
-    ruta_nuevo_archivo = 'obras_urbanas_modificado.csv'
-    # Exporta el DataFrame modificado a un nuevo archivo CSV
-    
     return df
