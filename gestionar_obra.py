@@ -1,131 +1,167 @@
+from os import system
 from abc import ABC, abstractmethod
-import extraer_datos as etl
-import modelo_orm as orm
+from peewee import *
+from extraer_datos import *
+from modelo_orm import *
+#import extraer_datos as etl
+#import modelo_ as 
 # definición de la clase abstracta “GestionarObra”
 class GestionarObra(ABC):
-  __dataFrame = None
+  dataFrame = None
+  db = None
+  Etapa = None
+  TipoObra = None
+  AreaResponsable = None
+  Comuna = None
+  Barrio = None
+  ContratacionTipo = None
+  Financiamiento = None
+  ObraUrbana = None
+
   def __init__():
     pass
   
-  @abstractmethod
-  def extraer_datos():
-    etl.funcion_extraer_datos()
-    print("Extraer datos OK.")
-    pass
+  @classmethod
+  def extraer_datos(cls):
+    GestionarObra.dataFrame = funcion_extraer_datos()
 
-  @abstractmethod
-  def conectar_db():
-    orm.funcion_conectar_db()
-    print("DB conectada.")
-    pass
+  @classmethod
+  def conectar_db(cls):
+    GestionarObra.db = funcion_conectar_db()
 
-  @abstractmethod
-  def mapear_orm():
-    orm.funcion_mapear_orm()
-    print("ORM mapeado.")
-    pass
 
-  @abstractmethod
-  def limpiar_datos():
-    global __dataFrame
-    __dataFrame = etl.funcion_limpiar()
-    print("DataFrame limpio.")
-    pass
-
-  @abstractmethod
-  def cargar_datos():
-    global __dataFrame
-    # Obtenemos valores únicos de cada columna.
-    lista_etapas = list(__dataFrame['etapa'].unique())
-    lista_tipoObras = list(__dataFrame['tipo'].unique())
-    lista_area_resps = list(__dataFrame['area_responsable'].unique())
-    lista_comunas = list(__dataFrame['comuna'].unique())
-    lista_barrios = list(__dataFrame['barrio'].unique())
-    lista_contratacion = list(__dataFrame['contratacion_tipo'].unique())
-    lista_financiamiento = list(__dataFrame['financiamiento'].unique())
-    # Cargamos tablas de consulta (lookups)
-
-    # Etapa
-    # TipoObra
-    # AreaResponsable
-    # Comuna
-    # Barrio
-    # ContratacionTipo
-    # Financiamiento
-    # ObraUrbana
+  @classmethod
+  def mapear_orm(cls):
+    # Guardamos en las variables de clase las clases que estan dentro de una funcion
+    GestionarObra.Etapa, GestionarObra.TipoObra, GestionarObra.AreaResponsable, GestionarObra.Comuna, GestionarObra.Barrio, GestionarObra.ContratacionTipo, GestionarObra.Financiamiento, GestionarObra.ObraUrbana = funcion_mapear_orm(GestionarObra.db)
     
+
+  @classmethod
+  def limpiar_datos(cls):
+    GestionarObra.dataFrame = funcion_limpiar(GestionarObra.dataFrame)
+    print("DataFrame limpio.")
+
+
+  @classmethod
+  def cargar_datos(cls):
+    # Obtenemos valores únicos de cada columna.
+    try:
+      lista_etapas = list(GestionarObra.dataFrame['etapa'].unique())
+      lista_tipoObras = list(GestionarObra.dataFrame['tipo'].unique())
+      lista_area_resps = list(GestionarObra.dataFrame['area_responsable'].unique())
+      lista_comunas = list(GestionarObra.dataFrame['comuna'].unique())
+      lista_barrios = list(GestionarObra.dataFrame['barrio'].unique())
+      lista_contratacion = list(GestionarObra.dataFrame['contratacion_tipo'].unique())
+      lista_financiamiento = list(GestionarObra.dataFrame['financiamiento'].unique())
+      print("Valores únicos por columna obtenidos correctamente.")
+    except Exception as e:
+       print("No se obtuvieron los valores únicos",e)
+
+    # ---------------------------  Cargamos tablas de consulta (lookups) -------------------
     for elem in lista_etapas:
         try:
-            orm.Etapa.create(nombre_etapa = elem)
-        except orm.IntegrityError as e:
+            GestionarObra.Etapa.create(nombre_etapa = elem)
+        except IntegrityError as e:
             print("Error al insertar un nuevo registro en la tabla Etapa", e)
     print("Se han persistido las etapas en la BD.")
        
     for elem in lista_tipoObras:
         try:
-            orm.TipoObra.create(tipo_obra = elem)
-        except orm.IntegrityError as e:
+            GestionarObra.TipoObra.create(tipo_obra = elem)
+        except IntegrityError as e:
             print("Error al insertar un nuevo registro en la tabla TipoObra", e)
     print("Se han persistido los tipos de obras en la BD.")
 
     for elem in lista_area_resps:
         try:
-            orm.AreaResponsable.create(nombre_area = elem)
-        except orm.IntegrityError as e:
+            GestionarObra.AreaResponsable.create(nombre_area = elem)
+        except IntegrityError as e:
             print("Error al insertar un nuevo registro en la tabla AreaResponsable", e)
     print("Se han persistido las áreas responsables en la BD.")
 
     for elem in lista_comunas:
         try:
-            orm.Comuna.create(nombre_comuna = elem)
-        except orm.IntegrityError as e:
+            GestionarObra.Comuna.create(nombre_comuna = elem)
+        except IntegrityError as e:
             print("Error al insertar un nuevo registro en la tabla Comuna", e)
     print("Se han persistido las comunas en la BD.")
 
     for elem in lista_barrios:
         try:
-            orm.Barrio.create(nombre_barrio = elem)
-        except orm.IntegrityError as e:
+            GestionarObra.Barrio.create(nombre_barrio = elem)
+        except IntegrityError as e:
             print("Error al insertar un nuevo registro en la tabla Barrio", e)
     print("Se han persistido los barrios en la BD.")
 
     for elem in lista_contratacion:
         try:
-            orm.ContratacionTipo.create(contratacion = elem)
-        except orm.IntegrityError as e:
+            GestionarObra.ContratacionTipo.create(contratacion = elem)
+        except IntegrityError as e:
             print("Error al insertar un nuevo registro en la tabla ContratacionTipo", e)
     print("Se han persistido los tipos de contrataciones en la BD.")
 
     for elem in lista_financiamiento:
         try:
-            orm.Financiamiento.create(financiamiento = elem)
-        except orm.IntegrityError as e:
+            GestionarObra.Financiamiento.create(financiamiento = elem)
+        except IntegrityError as e:
             print("Error al insertar un nuevo registro en la tabla Financiamiento", e)
     print("Se han persistido los financiamientos en la BD.")
 
 
     # Cargamos la tabla principal ObraUrbana
-    print("Recorremos las filas del archivo csv e insertamos los valores en la tabla 'viajes' de la BD")
-    for elem in __dataFrame.values:
+    print("cargando registros en tabla ObraUrbana...")
+    cargando = ""
+    for elem in GestionarObra.dataFrame.values:
+        # En vista de que tarda mucho, imprimimos un punto por cada iteracion para emular carga
+        cargando = cargando + "..."
+        print(cargando)
         # Se obtiene el id de la tabla lookup y lo guardamos en una variable.
-        etapa = orm.Etapa.get(orm.Etapa.nombre_nombre == elem[1])
+        fk_etapa = GestionarObra.Etapa.get(GestionarObra.Etapa.nombre_etapa == elem[2])
+        fk_obra = GestionarObra.TipoObra.get(GestionarObra.TipoObra.tipo_obra == elem[3])
+        fk_area_resp = GestionarObra.AreaResponsable.get(GestionarObra.AreaResponsable.nombre_area == elem[4])
+        fk_comuna = GestionarObra.Comuna.get(GestionarObra.Comuna.nombre_comuna == elem[7])
+        fk_barrio = GestionarObra.Barrio.get(GestionarObra.Barrio.nombre_barrio == elem[8])
+        fk_contratacion = GestionarObra.ContratacionTipo.get(GestionarObra.ContratacionTipo.contratacion == elem[17])
+        fk_financiamiento = GestionarObra.Financiamiento.get(GestionarObra.Financiamiento.financiamiento == elem[23])
         try:
-            orm.ObraUrbana.create(etapa=etapa,
-                                  date=elem[1],
-                                  parcial=elem[2],
-                                  quantity=elem[3],
+            GestionarObra.ObraUrbana.create(entorno=elem[0], #elem[indice] hace referencia a la columna del dataframe
+                                  nombre=elem[1],
+                                  etapa=fk_etapa,
+                                  tipo_obra=fk_obra,
+                                  area_responsable=fk_area_resp,
+                                  descripcion=elem[5],
+                                  monto_contrato=elem[6],
+                                  comuna=fk_comuna,
+                                  barrio=fk_barrio,
+                                  direccion=elem[9],
+                                  fecha_inicio=elem[10],
+                                  fecha_fin_inicial=elem[11],
+                                  plazo_meses=elem[12],
+                                  porcentaje_avance=elem[13],
+                                  imagen=elem[14],
+                                  licitacion_oferta_empresa=elem[15],
+                                  licitacion_anio=elem[16],
+                                  contratacion_tipo=fk_contratacion,
+                                  nro_contratacion=elem[18],
+                                  cuit_contratista=elem[19],
+                                  mano_obra=elem[20],
+                                  destacada=elem[21],
+                                  expediente_numero=elem[22],
+                                  financiamiento=fk_financiamiento
                                   )
-        except orm.IntegrityError as e:
-            print("Error al insertar un nuevo registro en la tabla viajes.", e)
-    print("Se han persistido los viajes en sube en la BD.")
+        except IntegrityError as e:
+            print("Error al insertar un nuevos registros en la tabla ObraUrbana.", e)
+    system('cls')
+    print("Se han persistido correctamente los registros en la BD.")
 
 
-  @abstractmethod
-  def nueva_obra():
+
+  @classmethod
+  def nueva_obra(cls):
     pass
 
-  @abstractmethod
-  def obtener_indicadores():
+  @classmethod
+  def obtener_indicadores(cls):
     """ mostrar por consola la siguiente información:
     a. Listado de todas las áreas responsables.
     b. Listado de todos los tipos de obra.
@@ -139,10 +175,10 @@ class GestionarObra(ABC):
     j. Monto total de inversión. """
     pass
 try:
-
   GestionarObra.extraer_datos()
   GestionarObra.conectar_db()
   GestionarObra.mapear_orm()
   GestionarObra.limpiar_datos()
+  GestionarObra.cargar_datos()
 except Exception as e:
   print(e)

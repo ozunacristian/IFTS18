@@ -4,16 +4,15 @@ import pandas as pd
 import unicodedata
 import re
 
-df = None
 def funcion_extraer_datos():
-    global df
     try:
         df = pd.read_csv('observatorio-de-obras-urbanas.csv', encoding = 'UTF-8')
+        print("Datos extraidos correctamente.")
     except Exception as e:
         print("Error al extraer datos ,", e)
+    return df
 
-def funcion_limpiar():
-    global df
+def funcion_limpiar(df):
     # Eliminamos las columnas que no vamos a utilizar
     df = df.drop(columns=["ID", "lat", "lng", "imagen_2", "imagen_3", "imagen_4", "beneficiarios", "compromiso", "ba_elige", "link_interno", "pliego_descarga", "estudio_ambiental_descarga"])
 
@@ -34,8 +33,6 @@ def funcion_limpiar():
     df["etapa"] = df["etapa"].replace(['Desestimada','Neutralizada', 'En Licitación'], "Rescindida")
     df['etapa'] = df['etapa'].astype(str)
 
-    #Verificamos valores únicos en ETAPA
-    valores_unicos_etapa = df['etapa'].unique()
 
     #TIPO
     df["tipo"] = df["tipo"].str.title()
@@ -46,15 +43,11 @@ def funcion_limpiar():
     df["tipo"] = df["tipo"].replace('Hidráulica E Infraestructura/ Espacio Público',"Hidráulica E Infraestructura")
     df['tipo'] = df['tipo'].astype(str)
 
-    #Verificamos valores únicos en TIPO
-    valores_unicos_tipo = df['tipo'].unique()
 
     #AREA RESPONSABLE
     df["area_responsable"] = df["area_responsable"].str.strip()
     df['area_responsable'] = df['area_responsable'].astype(str)
 
-    #Verificamos valores únicos en AREA RESPONSABLE
-    valores_unicos_area_responsable = df['area_responsable'].unique()
 
     #DESCRIPCION
     df["tipo"] = df["tipo"].str.strip()
@@ -94,8 +87,6 @@ def funcion_limpiar():
     df.iloc[939, df.columns.get_loc("comuna")] = 'Comuna 15'
     df['comuna'] = df['comuna'].astype(str)
 
-    #Verificamos valores únicos en COMUNA
-    valores_unicos_comuna = df['comuna'].unique()
 
     #BARRIO
     df["barrio"] = df["barrio"].str.title()

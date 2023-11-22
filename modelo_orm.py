@@ -1,23 +1,22 @@
 from peewee import *
 
-sqlite_db = None
-# función que conecta la base de datos con control de excepción.
+# función que conecta y retorna base de datos.
 def funcion_conectar_db():
-  global sqlite_db
   sqlite_db = SqliteDatabase('obras_urbanas.db', pragmas={'journal_mode': 'wal'})
   try:
-      sqlite_db.connect()
-      print("Base de datos fué conectada.")
+    sqlite_db.connect()
+    print("Base de datos conectada.")
   except OperationalError as e:
-      print("Error al conectar con la BD.", e)
-      exit()
+    print("Error al conectar con la BD.", e)
+    exit()
+  return sqlite_db
+  
 
-# función que mapea y crea las tablas de la base de datos en donde se ingresará el dataset limpio.
-def funcion_mapear_orm():
-  global sqlite_db
+# función que mapea y crea las tablas de la base de datos en donde se cargará el dataset limpio.
+def funcion_mapear_orm(db):
   class BaseModel(Model):
     class Meta:
-        database = sqlite_db
+        database = db
 
     # -----------------------------Tablas de consulta (lookups) -------------------------
   class Etapa(BaseModel):
@@ -55,7 +54,7 @@ def funcion_mapear_orm():
   class Barrio(BaseModel):
     ID_BARRIO = AutoField()
     nombre_barrio = CharField(unique=True)
-    comuna = ForeignKeyField(Comuna, backref='barrios') # Muchos barrios pueden estar en una comuna
+    #comuna = ForeignKeyField(Comuna, backref='barrio') # Muchos barrios pueden estar en una comuna
     def __str__(self):
       return self.nombre_barrio
     class Meta:
@@ -81,14 +80,14 @@ def funcion_mapear_orm():
   class ObraUrbana(BaseModel):
     ID_OBRA_URBANA = AutoField() # por forma N1 se agrega campo ID, a definir
     entorno = CharField(100) # Se limita a 100 carácteres.
-    FK_etapa = ForeignKeyField(Etapa, backref='obra_urbana')
-    FK_tipo_obra = ForeignKeyField(TipoObra, backref='obra_urbana')
-    FK_area_responsable = ForeignKeyField(AreaResponsable, backref = 'obra_urbana')
     nombre = CharField(100)
+    etapa = ForeignKeyField(Etapa, backref='obra_urbana')
+    tipo_obra = ForeignKeyField(TipoObra, backref='obra_urbana')
+    area_responsable = ForeignKeyField(AreaResponsable, backref = 'obra_urbana')
     descripcion = CharField(500)
     monto_contrato = IntegerField(20)
-    FK_comuna = ForeignKeyField(Comuna, backref = 'obra_urbana')
-    FK_barrio = ForeignKeyField(Barrio, backref='obra_urbana') # Analizar mejor : deberíamos poder responder ¿cuántos barrios por comuna?
+    comuna = ForeignKeyField(Comuna, backref = 'obra_urbana')
+    barrio = ForeignKeyField(Barrio, backref='obra_urbana') # Analizar mejor : deberíamos poder responder ¿cuántos barrios por comuna?
     direccion = CharField(200)
     fecha_inicio = DateField()
     fecha_fin_inicial = DateField()
@@ -97,18 +96,21 @@ def funcion_mapear_orm():
     imagen = TextField()
     licitacion_oferta_empresa = TextField()
     licitacion_anio = IntegerField()
-    FK_contratacion_tipo = ForeignKeyField(ContratacionTipo, backref = 'obra_urbana')
+    contratacion_tipo = ForeignKeyField(ContratacionTipo, backref = 'obra_urbana')
     nro_contratacion = CharField(50)
     cuit_contratista = IntegerField()
     mano_obra = IntegerField()
     destacada = BooleanField()
     expediente_numero = CharField(100)
-    FK_financiamiento = ForeignKeyField(Financiamiento, backref = 'obra_urbana')
+    financiamiento = ForeignKeyField(Financiamiento, backref = 'obra_urbana')
 
     def __str__(self):
         pass
     class Meta:
         db_table = 'ObraUrbana'
-
+  
   # Creamos todas las tablas
-  sqlite_db.create_tables([Etapa, TipoObra, AreaResponsable, Comuna, Barrio, ContratacionTipo, Financiamiento, ObraUrbana])
+  db.create_tables([Etapa, TipoObra, AreaResponsable, Comuna, Barrio, ContratacionTipo, Financiamiento, ObraUrbana])
+  print("ORM mapeado.")
+  # Retornamos las clases por estar dentro de una función.
+  return Etapa, TipoObra, AreaResponsable, Comuna, Barrio, ContratacionTipo, Financiamiento, ObraUrbana
