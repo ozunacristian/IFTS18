@@ -150,7 +150,7 @@ class GestionarObra(ABC):
                                   financiamiento=fk_financiamiento
                                   )
         except IntegrityError as e:
-            print("Error al insertar un nuevos registros en la tabla ObraUrbana.", e)
+            print("Error al insertar un nuevo registro en la tabla ObraUrbana.", e)
     system('cls')
     print("Se han persistido correctamente los registros en la BD.")
 
