@@ -150,10 +150,10 @@ def funcion_limpiar(df):
     df["plazo_meses"] = df["plazo_meses"].fillna(0)
 
     #PORCENTAJE_AVANCE
-
-    df["porcentaje_avance"] = df["porcentaje_avance"].fillna(0)
+    
     df["porcentaje_avance"] = df["porcentaje_avance"].str.replace("%","", regex=True)
     df["porcentaje_avance"] = df["porcentaje_avance"].str.replace(",", ".").astype(float)
+    df["porcentaje_avance"] = df["porcentaje_avance"].fillna(0)
 
     #IMAGEN_1
 
