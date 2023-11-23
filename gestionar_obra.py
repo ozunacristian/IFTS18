@@ -113,7 +113,7 @@ class GestionarObra(ABC):
     cargando = ""
     for elem in GestionarObra.dataFrame.values:
         # En vista de que tarda mucho, imprimimos un punto por cada iteracion para emular carga
-        cargando = cargando + "..."
+        cargando = cargando + "."
         print(cargando)
         # Se obtiene el id de la tabla lookup y lo guardamos en una variable.
         fk_etapa = GestionarObra.Etapa.get(GestionarObra.Etapa.nombre_etapa == elem[2])
