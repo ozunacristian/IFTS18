@@ -57,6 +57,11 @@ class GestionarObra(ABC):
     except Exception as e:
        print("No se obtuvieron los valores únicos",e)
 
+    # ---- Las tablas comuna y barrio estan relacionadas, para eso creamos diccionario basándonos en el dataframe--------
+    comunas_barrios = {}
+    for comuna in lista_comunas:
+        comunas_barrios[comuna] = GestionarObra.dataFrame[GestionarObra.dataFrame['comuna'] == comuna]['barrio'].unique()
+
     # ---------------------------  Cargamos tablas de consulta (lookups) -------------------
     for elem in lista_etapas:
         try:
@@ -79,19 +84,16 @@ class GestionarObra(ABC):
             print("Error al insertar un nuevo registro en la tabla AreaResponsable", e)
     print("Se han persistido las áreas responsables en la BD.")
 
+    # Se carga comuna y barrios sirviendose del diccionario creado en la línea 63
     for elem in lista_comunas:
-        try:
-            GestionarObra.Comuna.create(nombre_comuna = elem)
-        except IntegrityError as e:
-            print("Error al insertar un nuevo registro en la tabla Comuna", e)
-    print("Se han persistido las comunas en la BD.")
-
-    for elem in lista_barrios:
-        try:
-            GestionarObra.Barrio.create(nombre_barrio = elem)
-        except IntegrityError as e:
-            print("Error al insertar un nuevo registro en la tabla Barrio", e)
-    print("Se han persistido los barrios en la BD.")
+      try:
+          comuna = GestionarObra.Comuna.create(nombre_comuna=elem)
+          for barrio in comunas_barrios[elem]:
+              # se asocia cada barrio a su comuna correspondiente
+              GestionarObra.Barrio.create(nombre_barrio=barrio, comuna=comuna)
+          print("Se han persistido las comunas y sus barrios en la BD.")
+      except IntegrityError as e:
+          print("Error al insertar un nuevo registro en la tabla Comuna y barrio", e)
 
     for elem in lista_contratacion:
         try:

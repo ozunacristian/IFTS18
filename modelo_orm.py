@@ -54,7 +54,7 @@ def funcion_mapear_orm(db):
   class Barrio(BaseModel):
     ID_BARRIO = AutoField()
     nombre_barrio = CharField(unique=True)
-    #comuna = ForeignKeyField(Comuna, backref='barrio') # Muchos barrios pueden estar en una comuna
+    comuna = ForeignKeyField(Comuna, backref='barrio') # Muchos barrios pueden estar en una comuna
     def __str__(self):
       return self.nombre_barrio
     class Meta:
