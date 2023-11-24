@@ -24,6 +24,185 @@ class Obra:
     self.expediente_numero
     self.financiamiento
 
+  #DECORADORES
+  @property
+  def entorno(self):
+    return self.__entorno
+  @entorno.setter
+  def entorno(self, valor):
+    self.__entorno = valor
+
+  @property
+  def etapa(self):
+    return self.__etapa
+  @etapa.setter
+  def etapa(self, valor = 4):
+      self.__etapa = valor 
+
+  @property
+  def tipo_obra(self):
+    return self.__tipo_obra
+  @tipo_obra.setter
+  def tipo_obra(self, valor):
+    self.__tipo_obra = valor
+    
+  @property
+  def area_responsable(self):
+    return self.__area_responsable
+  @area_responsable.setter
+  def area_responsable(self, valor):
+    self.__area_responsable = valor
+
+  @property
+  def nombre(self):
+    return self.__nombre
+  @nombre.setter
+  def nombre(self, valor):
+    self.__nombre = valor
+
+  @property
+  def descripcion(self):
+    return self.__descripcion
+  @descripcion.setter
+  def descripcion(self, valor):
+    self.descripcion = valor
+
+  @property
+  def monto_contrato(self):
+        return self.__monto_contrato
+    
+  @monto_contrato.setter 
+  def monto_contrato(self, valor):
+      self.__monto_contrato = valor
+
+  @property
+  def comuna(self):
+      return self.__comuna
+  
+  @comuna.setter
+  def comuna(self, valor):
+      self.__comuna = valor
+
+  @property
+  def direccion(self):
+      return self.__direccion
+  
+  @direccion.setter
+  def direccion(self, valor):
+      self.__direccion = valor
+
+  @property
+  def fecha_inicio(self):
+      return self.__fecha_inicio
+  
+  @fecha_inicio.setter
+  def fecha_inicio(self, valor):
+      self.__fecha_inicio = valor
+
+  @property
+  def fecha_fin_inicial(self):
+      return self.__fecha_fin_inicial
+  
+  @fecha_fin_inicial.setter
+  def fecha_fin_inicial(self, valor):
+      self.__fecha_fin_inicial = valor
+
+  @property
+  def plazo_meses(self):
+      return self.__plazo_meses
+  
+  @plazo_meses.setter
+  def plazo_meses(self, valor = 0 ):
+      self.__plazo_meses = valor
+
+  @property
+  def porcentaje_avance(self):
+      return self.__porcentaje_avance
+  
+  @porcentaje_avance.setter
+  def porcentaje_avance(self, valor):
+      self.__porcentaje_avance = valor
+
+  @property
+  def imagen(self):
+      return self.__imagen
+  
+  @imagen.setter
+  def imagen(self, valor):
+      self.__imagen = valor
+
+  @property
+  def licitacion_oferta_empresa(self):
+      return self.__licitacion_oferta_empresa
+  
+  @licitacion_oferta_empresa.setter
+  def licitacion_oferta_empresa(self, valor):
+      self.__licitacion_oferta_empresa = valor
+
+  @property
+  def licitacion_anio(self):
+      return self.__licitacion_anio
+  
+  @licitacion_anio.setter
+  def licitacion_anio(self, valor):
+      self.__licitacion_anio = valor
+
+  @property
+  def contratacion_tipo(self):
+      return self.__contratacion_tipo
+  
+  @contratacion_tipo.setter
+  def contratacion_tipo(self, valor):
+      self.__contratacion_tipo = valor
+
+  @property
+  def nro_contratacion(self):
+      return self.__nro_contratacion
+  
+  @nro_contratacion.setter
+  def nro_contratacion(self, valor):
+      self.__nro_contratacion = valor
+
+  @property
+  def cuit_contratista(self):
+      return self.__cuit_contratista
+  
+  @cuit_contratista.setter
+  def cuit_contratista(self, valor):
+      self.__cuit_contratista = valor
+
+  @property
+  def mano_obra(self):
+      return self.__mano_obra
+  
+  @mano_obra.setter
+  def mano_obra(self, valor):
+      self.__mano_obra = valor
+
+  @property
+  def destacada(self):
+      return self.__destacada
+  
+  @destacada.setter
+  def destacada(self, valor):
+      self.__destacada = valor
+
+  @property
+  def expediente_numero(self):
+      return self.__expediente_numero
+  
+  @expediente_numero.setter
+  def expediente_numero(self, valor):
+      self.__expediente_numero = valor
+
+  @property
+  def financiamiento(self):
+      return self.__financiamiento
+  
+  @financiamiento.setter
+  def financiamiento(self, valor):
+      self.__financiamiento = valor
+
 # NUEVA OBRA
 # LLAMA A TODOS LOS METODOS DE INSTANCIA menos rescindir_obra
 	
@@ -31,26 +210,26 @@ class Obra:
 # los siguientes métodos de instancia con el objetivo de definir las diferentes etapas de avance
 # de obra:
 # a. nuevo_proyecto().
-# 	Asigna "Proyecto" en etapa
-# 	Ingresa entorno
-# 	Ingresa nombre
-# 	Tipo obra*
-# 	Area responsable *
-# 	Ingresa descripción
-# 	Monto contrato (FLOAT)
-# 	Comuna *
-# 	Barrio *
-# 	Direccion 
-# 	plazo_meses (FLOAT)
-# 	Porcentaje_avances (0)
-# 	imagen_1
+  # 	Asigna "Proyecto" en etapa
+  # 	Ingresa entorno
+  # 	Ingresa nombre
+  # 	Tipo obra*
+  # 	Area responsable *
+  # 	Ingresa descripción
+  # 	Monto contrato (FLOAT)
+  # 	Comuna *
+  # 	Barrio *
+  # 	Direccion 
+  # 	plazo_meses (FLOAT)
+  # 	Porcentaje_avances (0)
+  # 	imagen_1
 	
 # b. iniciar_contratacion().	
-# 	COntratacion_tipo *
-# 	nro_contratacion
-# 	cuit_contratista
-# 	liciation_anio (INT)
-# 	contratacion_tipo *
+  # 	COntratacion_tipo *
+  # 	nro_contratacion
+  # 	cuit_contratista
+  # 	liciation_anio (INT)
+  # 	contratacion_tipo *
 	
 # c. adjudicar_obra().
 # 	Licitacion_oferta_empresa*				

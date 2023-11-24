@@ -4,15 +4,7 @@ import pandas as pd
 import unicodedata
 import re
 
-def funcion_extraer_datos():
-    try:
-        df = pd.read_csv('observatorio-de-obras-urbanas.csv', encoding = 'UTF-8')
-        print("Datos extraidos correctamente.")
-    except Exception as e:
-        print("Error al extraer datos ,", e)
-    return df
-
-def funcion_limpiar(df):
+def limpiar(df): # recibe DataFrame sin preprocesar
     # Eliminamos las columnas que no vamos a utilizar
     df = df.drop(columns=["ID", "lat", "lng", "imagen_2", "imagen_3", "imagen_4", "beneficiarios", "compromiso", "ba_elige", "link_interno", "pliego_descarga", "estudio_ambiental_descarga"])
 

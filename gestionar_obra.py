@@ -1,58 +1,51 @@
-from os import system
-from abc import ABC, abstractmethod
 from peewee import *
-from extraer_datos import *
-from modelo_orm import *
-#import extraer_datos as etl
-#import modelo_ as 
-# definición de la clase abstracta “GestionarObra”
-class GestionarObra(ABC):
-  dataFrame = None
-  db = None
-  Etapa = None
-  TipoObra = None
-  AreaResponsable = None
-  Comuna = None
-  Barrio = None
-  ContratacionTipo = None
-  Financiamiento = None
-  ObraUrbana = None
+from abc import ABC
+from os import system
+from preprocesado import *
 
+class GestionarObra(ABC):
   def __init__():
     pass
   
   @classmethod
-  def extraer_datos(cls):
-    GestionarObra.dataFrame = funcion_extraer_datos()
+  def extraer_datos(cls): # retorna DataFrame sin preprocesado.
+    try:
+        df = pd.read_csv('observatorio-de-obras-urbanas.csv', encoding = 'UTF-8')
+        print("Datos extraidos correctamente.")
+    except Exception as e:
+        print("Error al extraer datos ,", e)
+    return df
 
   @classmethod
-  def conectar_db(cls):
-    GestionarObra.db = funcion_conectar_db()
-
+  def conectar_db(cls): # retorna el sqlite_db
+    sqlite_db = SqliteDatabase('obras_urbanas.db', pragmas={'journal_mode': 'wal'})
+    try:
+        sqlite_db.connect()
+        return sqlite_db
+    except OperationalError as e:
+        print("Se ha generado un error en la conexion a la BD.", e)
+        exit()
 
   @classmethod
-  def mapear_orm(cls):
-    # Guardamos en las variables de clase las clases que estan dentro de una funcion
-    GestionarObra.Etapa, GestionarObra.TipoObra, GestionarObra.AreaResponsable, GestionarObra.Comuna, GestionarObra.Barrio, GestionarObra.ContratacionTipo, GestionarObra.Financiamiento, GestionarObra.ObraUrbana = funcion_mapear_orm(GestionarObra.db)
+  def mapear_orm(cls, db, tablas): # toma sqlite_db y una lista de tablas para mapear
+    db.create_tables(tablas)
     
+  @classmethod
+  def limpiar_datos(cls): # retorna DataFrame limpio
+    df = limpiar(cls.extraer_datos())
+    return df
 
   @classmethod
-  def limpiar_datos(cls):
-    GestionarObra.dataFrame = funcion_limpiar(GestionarObra.dataFrame)
-    print("DataFrame limpio.")
-
-
-  @classmethod
-  def cargar_datos(cls):
+  def cargar_datos(cls, Etapa, TipoObra, AreaResponsable, Comuna, Barrio, ContratacionTipo, Financiamiento, Obra):
+    df = cls.limpiar_datos()
     # Obtenemos valores únicos de cada columna.
     try:
-      lista_etapas = list(GestionarObra.dataFrame['etapa'].unique())
-      lista_tipoObras = list(GestionarObra.dataFrame['tipo'].unique())
-      lista_area_resps = list(GestionarObra.dataFrame['area_responsable'].unique())
-      lista_comunas = list(GestionarObra.dataFrame['comuna'].unique())
-      lista_barrios = list(GestionarObra.dataFrame['barrio'].unique())
-      lista_contratacion = list(GestionarObra.dataFrame['contratacion_tipo'].unique())
-      lista_financiamiento = list(GestionarObra.dataFrame['financiamiento'].unique())
+      lista_etapas = list(df['etapa'].unique())
+      lista_tipoObras = list(df['tipo'].unique())
+      lista_area_resps = list(df['area_responsable'].unique())
+      lista_comunas = list(df['comuna'].unique())
+      lista_contratacion = list(df['contratacion_tipo'].unique())
+      lista_financiamiento = list(df['financiamiento'].unique())
       print("Valores únicos por columna obtenidos correctamente.")
     except Exception as e:
        print("No se obtuvieron los valores únicos",e)
@@ -60,26 +53,26 @@ class GestionarObra(ABC):
     # ---- Las tablas comuna y barrio estan relacionadas, para eso creamos diccionario basándonos en el dataframe--------
     comunas_barrios = {}
     for comuna in lista_comunas:
-        comunas_barrios[comuna] = GestionarObra.dataFrame[GestionarObra.dataFrame['comuna'] == comuna]['barrio'].unique()
+        comunas_barrios[comuna] = df[df['comuna'] == comuna]['barrio'].unique()
 
     # ---------------------------  Cargamos tablas de consulta (lookups) -------------------
     for elem in lista_etapas:
         try:
-            GestionarObra.Etapa.create(nombre_etapa = elem)
+            Etapa.create(nombre_etapa = elem)
         except IntegrityError as e:
             print("Error al insertar un nuevo registro en la tabla Etapa", e)
     print("Se han persistido las etapas en la BD.")
        
     for elem in lista_tipoObras:
         try:
-            GestionarObra.TipoObra.create(tipo_obra = elem)
+            TipoObra.create(tipo_obra = elem)
         except IntegrityError as e:
             print("Error al insertar un nuevo registro en la tabla TipoObra", e)
     print("Se han persistido los tipos de obras en la BD.")
 
     for elem in lista_area_resps:
         try:
-            GestionarObra.AreaResponsable.create(nombre_area = elem)
+            AreaResponsable.create(nombre_area = elem)
         except IntegrityError as e:
             print("Error al insertar un nuevo registro en la tabla AreaResponsable", e)
     print("Se han persistido las áreas responsables en la BD.")
@@ -87,24 +80,24 @@ class GestionarObra(ABC):
     # Se carga comuna y barrios sirviendose del diccionario creado en la línea 63
     for elem in lista_comunas:
       try:
-          comuna = GestionarObra.Comuna.create(nombre_comuna=elem)
+          comuna = Comuna.create(nombre_comuna=elem)
           for barrio in comunas_barrios[elem]:
               # se asocia cada barrio a su comuna correspondiente
-              GestionarObra.Barrio.create(nombre_barrio=barrio, comuna=comuna)
+              Barrio.create(nombre_barrio=barrio, comuna=comuna)
           print("Se han persistido las comunas y sus barrios en la BD.")
       except IntegrityError as e:
           print("Error al insertar un nuevo registro en la tabla Comuna y barrio", e)
 
     for elem in lista_contratacion:
         try:
-            GestionarObra.ContratacionTipo.create(contratacion = elem)
+            ContratacionTipo.create(contratacion = elem)
         except IntegrityError as e:
             print("Error al insertar un nuevo registro en la tabla ContratacionTipo", e)
     print("Se han persistido los tipos de contrataciones en la BD.")
 
     for elem in lista_financiamiento:
         try:
-            GestionarObra.Financiamiento.create(financiamiento = elem)
+            Financiamiento.create(financiamiento = elem)
         except IntegrityError as e:
             print("Error al insertar un nuevo registro en la tabla Financiamiento", e)
     print("Se han persistido los financiamientos en la BD.")
@@ -113,20 +106,20 @@ class GestionarObra(ABC):
     # Cargamos la tabla principal ObraUrbana
     print("cargando registros en tabla ObraUrbana...")
     cargando = ""
-    for elem in GestionarObra.dataFrame.values:
+    for elem in df.values:
         # En vista de que tarda mucho, imprimimos un punto por cada iteracion para emular carga
         cargando = cargando + "."
         print(cargando)
         # Se obtiene el id de la tabla lookup y lo guardamos en una variable.
-        fk_etapa = GestionarObra.Etapa.get(GestionarObra.Etapa.nombre_etapa == elem[2])
-        fk_obra = GestionarObra.TipoObra.get(GestionarObra.TipoObra.tipo_obra == elem[3])
-        fk_area_resp = GestionarObra.AreaResponsable.get(GestionarObra.AreaResponsable.nombre_area == elem[4])
-        fk_comuna = GestionarObra.Comuna.get(GestionarObra.Comuna.nombre_comuna == elem[7])
-        fk_barrio = GestionarObra.Barrio.get(GestionarObra.Barrio.nombre_barrio == elem[8])
-        fk_contratacion = GestionarObra.ContratacionTipo.get(GestionarObra.ContratacionTipo.contratacion == elem[17])
-        fk_financiamiento = GestionarObra.Financiamiento.get(GestionarObra.Financiamiento.financiamiento == elem[23])
+        fk_etapa = Etapa.get(Etapa.nombre_etapa == elem[2])
+        fk_obra = TipoObra.get(TipoObra.tipo_obra == elem[3])
+        fk_area_resp = AreaResponsable.get(AreaResponsable.nombre_area == elem[4])
+        fk_comuna = Comuna.get(Comuna.nombre_comuna == elem[7])
+        fk_barrio = Barrio.get(Barrio.nombre_barrio == elem[8])
+        fk_contratacion = ContratacionTipo.get(ContratacionTipo.contratacion == elem[17])
+        fk_financiamiento = Financiamiento.get(Financiamiento.financiamiento == elem[23])
         try:
-            GestionarObra.ObraUrbana.create(entorno=elem[0], #elem[indice] hace referencia a la columna del dataframe
+            Obra.create(entorno=elem[0], #elem[indice] hace referencia a la columna del dataframe
                                   nombre=elem[1],
                                   etapa=fk_etapa,
                                   tipo_obra=fk_obra,
@@ -156,12 +149,11 @@ class GestionarObra(ABC):
     system('cls')
     print("Se han persistido correctamente los registros en la BD.")
 
-
-
   @classmethod
   def nueva_obra(cls):
+    # desarrollando...
     pass
-
+  
   @classmethod
   def obtener_indicadores(cls):
     """ mostrar por consola la siguiente información:
@@ -176,11 +168,4 @@ class GestionarObra(ABC):
     i. Cantidad total de mano de obra empleada.
     j. Monto total de inversión. """
     pass
-try:
-  GestionarObra.extraer_datos()
-  GestionarObra.conectar_db()
-  GestionarObra.mapear_orm()
-  GestionarObra.limpiar_datos()
-  GestionarObra.cargar_datos()
-except Exception as e:
-  print(e)
+
