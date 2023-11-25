@@ -1,11 +1,12 @@
 from peewee import *
-from gestionar_obra import *
+from gestionar_obra import GestionarObra
 import datetime
 
+sqlite_db = GestionarObra().conectar_db()
 # función que mapea y crea las tablas de la base de datos en donde se cargará el dataset limpio.
 class BaseModel(Model):
   class Meta:
-      database = db
+      database = sqlite_db
 
   # -----------------------------Tablas de consulta (lookups) -------------------------
 class Etapa(BaseModel):
@@ -74,7 +75,7 @@ class Obra(BaseModel):
   tipo_obra = ForeignKeyField(TipoObra, backref='obra')
   area_responsable = ForeignKeyField(AreaResponsable, backref = 'obra')
   descripcion = CharField(500)
-  monto_contrato = IntegerField(20)
+  monto_contrato = FloatField(20)
   comuna = ForeignKeyField(Comuna, backref = 'obra')
   barrio = ForeignKeyField(Barrio, backref='obra') # Analizar mejor : deberíamos poder responder ¿cuántos barrios por comuna?
   direccion = CharField(200)
@@ -100,8 +101,11 @@ class Obra(BaseModel):
       db_table = 'Obra'
 
   def nuevo_proyecto(self):
-    self.etapa = 'Proyecto'
-    #sqlite_db = GestionarObra().conectar_db()
+    self.etapa = 4
+
+    self.entorno = input("Ingrese entorno del proyecto: ")
+
+    self.nombre = input("Ingrese nombre del proyecto: ")
 
     # Mostrar opciones TipoObra
     with GestionarObra().conectar_db() as sqlite_db:
@@ -114,7 +118,7 @@ class Obra(BaseModel):
             # Se muestra los tipos de obras y crea la lista
             lista = [resultado.tipo_obra for resultado in resultados]
             if lista:
-                print("Los tipos de obras son:")
+                print("Seleccione el tipo de obra:")
                 for i, tipo in enumerate(lista, start=1):
                     print(f"{i} {tipo}")
             else:
@@ -128,8 +132,157 @@ class Obra(BaseModel):
                       break
                   except Exception:
                       print("Ingrese una opcion correcta")
-              
-    
+
+#Area responsable
+    with GestionarObra().conectar_db() as sqlite_db:
+              # Consulta a la base de datos
+            query = AreaResponsable.select()
+            resultados = list(query)
+
+            # Se muestra las areas de obras y crea la lista
+            lista = [resultado.nombre_area for resultado in resultados]
+            if lista:
+                print("Seleccione un área responsable:")
+                for i, area in enumerate(lista, start=1):
+                    print(f"{i} {area}")
+            else:
+                print("No se encontraron áreas responsables.")
+
+            opcion = -1
+            while opcion < 0 and opcion > (len(lista)-1):
+                  try:
+                      opcion=int(input("Elija el número de opción: "))
+                      self.area_responsable = lista[opcion-1]
+                      break
+                  except Exception:
+                      print("Ingrese una opcion correcta")    
+
+    self.descripcion = input("Ingrese descripción de la obra: ")
+
+#monto_contrato
+    montoC = input("Ingrese el monto del contrato de obra (Ej: 9999.99):")
+    flag = False
+    while flag == False:
+      try:
+        float(montoC)
+        self.monto_contrato = float(montoC)
+        flag = True
+      except Exception:
+        print("Ingrese un número válido (Ej: 1234.56):")
+
+#Comuna
+    with GestionarObra().conectar_db() as sqlite_db:
+              # Consulta a la base de datos
+            query = Comuna.select()
+            resultados = list(query)
+
+            # Se muestra las areas de obras y crea la lista
+            lista = [resultado.nombre_comuna for resultado in resultados]
+            if lista:
+                print("Seleccione una comuna:")
+                for i, comuna in enumerate(lista, start=1):
+                    print(f"{i} {comuna}")
+            else:
+                print("No se encontraron comunas.")
+
+            opcion = -1
+            while opcion < 0 and opcion > (len(lista)-1):
+                  try:
+                      opcion=int(input("Elija el número de opción: "))
+                      self.comuna = lista[opcion-1]
+                      break
+                  except Exception:
+                      print("Ingrese una opcion correcta")   
+
+#Barrio
+    with GestionarObra().conectar_db() as sqlite_db:
+              # Consulta a la base de datos
+            query = Barrio.select()
+            resultados = list(query)
+
+            # Se muestra las areas de obras y crea la lista
+            lista = [resultado.nombre_barrio for resultado in resultados]
+            if lista:
+                print("Seleccione un barrio:")
+                for i, barrio in enumerate(lista, start=1):
+                    print(f"{i} {barrio}")
+            else:
+                print("No se encontraron barrios.")
+
+            opcion = -1
+            while opcion < 0 and opcion > (len(lista)-1):
+                  try:
+                      opcion=int(input("Elija el número de opción: "))
+                      self.barrio = lista[opcion-1]
+                      break
+                  except Exception:
+                      print("Ingrese una opcion correcta")   
+
+    self.direccion = input("Ingrese dirección de la obra: ")
+
+#Plazo meses
+    plazoM = input("Ingrese el plazo en meses de la obra, si la misma no es un mes entero, por favor ingrese un número decimal. (Ej: 9.9):")
+    flag = False
+    while flag == False:
+      try:
+        float(plazoM)
+        self.plazo_meses = float(plazoM)
+        flag = True
+      except Exception:
+        print("Ingrese un número válido (Ej: 12.3):")
+
+#porcentaje_avance
+    flag2 = False
+    while flag2 == False:
+      try:
+        porcentajeA = int(input("Ingrese el de avance de la obra (sólo numeros enteros):"))
+      except Exception:
+        print("Ingrese un número válido")
+      else:
+          if porcentajeA <=100 and porcentajeA >=0:
+            self.porcentaje_avance = porcentajeA
+            flag2 = True
+          else:
+            print("Ingrese un número entre 0 y 100.")
+
+#imagen_1
+    self.imagen_1 = input("Ingrese un enlace de imagen de la obra: ")
+
+	
+# b. iniciar_contratacion().	
+# 	COntratacion_tipo *
+# 	nro_contratacion
+# 	cuit_contratista
+# 	liciation_anio (INT)
+# 	contratacion_tipo *
+	
+# c. adjudicar_obra().
+# 	Licitacion_oferta_empresa*				
+# 	Expediente numero 
+	
+# d. iniciar_obra().
+# 	destacada(BOOL)
+# 	Fecha_inicio
+# 	Fecha_fin_inicial
+# 	financiamiento*
+# 	mano_obra (INT)
+	
+# e. actualizar_porcentaje_avance().
+# 	MODIFICA: Porcentaje_avances(0)
+	
+# f. incrementar_plazo().
+# 	MODIFICA:plazo_meses (FLOAT)
+	
+# g. incrementar_mano_obra().
+# 	MODIFICA:mano_obra (INT)
+	
+# h. finalizar_obra().
+# 	MODIFICA:Asigna "Finalizado" en etapa
+# 	MODIFICA:MODIFICA: Porcentaje_avances(0)
+# 	((LLAMA A ACTUALIZAR % AVANCE))
+	
+# i. rescindir_obra().
+# 	MODIFICA:Asigna "Rescindida" en etapa
   # VALIDAR TIPO DE DATO
   # Para iniciar un nuevo proyecto de obra se debe invocar al método nuevo_proyecto(). Aquí la etapa inicial de las nuevas instancias de Obra debe tener el valor “Proyecto” (si este valor no existe en la tabla “etapas” de la BD, se deberá crear la instancia y luego insertar el nuevo registro). Los valores de los atributos tipo_obra, area_responsable y barrio deben ser alguno de los existentes en la base de datos.
 
@@ -137,19 +290,58 @@ class Obra(BaseModel):
   # solicita entorno:str, nombre:str, 
   # Se muestra menu con opciones para tipo_obra, area_responsable, barrio.
 
-    pass
+
 
   def iniciar_contratacion(self):
-    # A continuación, se debe iniciar la licitación/contratación de la obra, para ello se debe invocar al método iniciar_contratacion(), asignando el TipoContratacion (debe ser un valor existente en la BD) y el nro_contratacion.
+    #contratacion_tipo:contratacion
+    with GestionarObra().conectar_db() as sqlite_db:
 
-    # Se solicita licitación/contratación de la obra
-    # Muestra opciones de contratacion_tipo traidas desde la BD.
-    # solicita nro_contratacion
-    pass
+            # Consulta a la base de datos
+            query = ContratacionTipo.select()
+            resultados = list(query)
+
+            # Se muestra los tipos de obras y crea la lista
+            lista = [resultado.contratacion for resultado in resultados]
+            if lista:
+                print("Seleccione el tipo de contratación:")
+                for i, tipo in enumerate(lista, start=1):
+                    print(f"{i} {tipo}")
+            else:
+                print("No se encontraron tipos de contratación.")
+
+            opcion = -1
+            while opcion < 0 and opcion > (len(lista)-1):
+                  try:
+                      opcion=int(input("Elija el número de opción: "))
+                      self.contratacion_tipo = lista[opcion-1]
+                      break
+                  except Exception:
+                      print("Ingrese una opcion correcta")
+
+#nro_contratacion
+    self.nro_contratacion = input("Ingrese número de contratación: ")
+
+#cuit_contratista
+    flagCuit = False
+    while flagCuit == False:
+      try:
+        cuitCont = int(input("Ingrese el cuit del contratista:"))
+        flagCuit = True
+      except Exception:
+        print("Ingrese un número válido")  
+
+#liciation_anio
+    flagLicitacion = False
+    while flagLicitacion == False:
+      try:
+        cuitCont = int(input("Ingrese el año de licitación:"))
+        flagLicitacion = True
+      except Exception:
+        print("Ingrese un número válido")
 
   def adjudicar_obra(self):
-    # Para adjudicar la obra a una empresa, se debe invocar al método adjudicar_obra() y asignarle la Empresa (debe ser una empresa existente en la BD) y el nro_expediente.
-    pass
+    self.licitacion_oferta_empresa = input("Ingrese licitación: ")
+    self.expediente_numero = input("Ingrese expediente: ")
 
   def iniciar_obra(self):
     # Para indicar el inicio de la obra, se debe invocar al método iniciar_obra(), y asignarle valores a los siguientes atributos: destacada, fecha_inicio, fecha_fin_inicial, fuente_financiamiento (debe ser un valor existente en la BD) y mano_obra.

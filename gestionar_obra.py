@@ -1,10 +1,12 @@
-from peewee import *
+from peewee import fn
 from abc import ABC
 from os import system
 from preprocesado import *
+from modelo_orm import *
+from main import Menu
 
 class GestionarObra(ABC):
-  def __init__():
+  def __init__(self):
     pass
   
   @classmethod
@@ -156,16 +158,112 @@ class GestionarObra(ABC):
   
   @classmethod
   def obtener_indicadores(cls):
-    """ mostrar por consola la siguiente información:
-    a. Listado de todas las áreas responsables.
-    b. Listado de todos los tipos de obra.
-    c. Cantidad de obras que se encuentran en cada etapa.
-    d. Cantidad de obras y monto total de inversión por tipo de obra.
-    e. Listado de todos los barrios pertenecientes a las comunas 1, 2 y 3.
-    f. Cantidad de obras finalizadas y su y monto total de inversión en la comuna 1.
-    g. Cantidad de obras finalizadas en un plazo menor o igual a 24 meses.
-    h. Porcentaje total de obras finalizadas.
-    i. Cantidad total de mano de obra empleada.
-    j. Monto total de inversión. """
-    pass
+     #GestionarObra().obtener_indicadores()
+        # Obtener todas las áreas responsables
+    print("SubMenu - Obtener Indicadores")
+
+    print("a. Listar Áreas Responsables")
+    print("b. Listar Tipos de Obra")
+    print("c. Contar Obras por Etapa")
+    print("d. Contar Obras y Monto por Tipo")
+    print("e. Listar Barrios de Comunas 1, 2, y 3")
+    print("f. Contar Obras Finalizadas en Comuna 1")
+    print("g. Contar Obras Finalizadas en 24 Meses")
+    print("h. Porcentaje de Obras Finalizadas")
+    print("i. Contar Mano de Obra Total")
+    print("j. Calcular Monto Total de Inversión")
+
+    opcion = input("Selecciona una opción: ")
+
+    # Seleccionar la opción
+    if opcion == 'a':
+        listar_areas_responsables()
+    elif opcion == 'b':
+        listar_tipos_obra()
+    elif opcion == 'c':
+        contar_obras_por_etapa()
+    elif opcion == 'd':
+        contar_obras_y_monto_por_tipo()
+    elif opcion == 'e':
+        listar_barrios_comunas_1_2_3()
+    elif opcion == 'f':
+        contar_obras_finalizadas_comuna_1()
+    elif opcion == 'g':
+        contar_obras_finalizadas_24_meses()
+    elif opcion == 'h':
+        porcentaje_obras_finalizadas()
+    elif opcion == 'i':
+        contar_mano_obra_total()
+    elif opcion == 'j':
+        calcular_monto_total_inversion()
+    else:
+        print("Opción no válida. Presiona Enter para continuar.")
+    
+def listar_areas_responsables(self):
+  areas_responsables = Obra.select(Obra.area_responsable).distinct()
+  print("a. Listado de todas las áreas responsables:")
+  for area_responsable in areas_responsables:
+    print(area_responsable.area_responsable)
+    
+def listar_tipos_obra(self):
+  # Obtener todos los tipos de obra
+  tipos_obra = Obra.select(Obra.tipo_obra).distinct()
+  print("\nb. Listado de todos los tipos de obra:")
+  for tipo_obra in tipos_obra:
+    print(tipo_obra.tipo_obra)
+
+def contar_obras_por_etapa(self):
+  # Cantidad de obras en cada etapa
+  obras_por_etapa = Obra.select(Obra.etapa, fn.COUNT(Obra.id).alias('cantidad')).group_by(Obra.etapa)
+  print("\nc. Cantidad de obras que se encuentran en cada etapa:")
+  for obra_por_etapa in obras_por_etapa:
+    print(f"{obra_por_etapa.etapa}: {obra_por_etapa.cantidad} obras")
+
+def contar_obras_y_monto_por_tipo(self):
+  obras_por_tipo = Obra.select(Obra.tipo_obra, fn.COUNT(Obra.id).alias('cantidad'), fn.SUM(Obra.monto_contrato).alias('monto_total')).group_by(Obra.tipo_obra) 
+  print("\nd. Cantidad de obras y monto total de inversión por tipo de obra:")
+  for obra_por_tipo in obras_por_tipo:
+    print(f"{obra_por_tipo.tipo_obra}: {obra_por_tipo.cantidad} obras, Monto total: {obra_por_tipo.monto_total}")
+
+def listar_barrios_comunas_1_2_3(self):
+  barrios_comunas_1_2_3 = Obra.select(Obra.barrio).where(Obra.comuna.in_([1, 2, 3])).distinct()
+  print("\ne. Listado de todos los barrios pertenecientes a las comunas 1, 2 y 3:")
+  for barrio in barrios_comunas_1_2_3:
+      print(barrio.barrio)
+
+def contar_obras_finalizadas_comuna_1(self):
+  obras_finalizadas_comuna_1 = Obra.select().where((Obra.comuna == 1) & (Obra.etapa == 'Finalizada'))
+  cantidad_obras_finalizadas_comuna_1 = obras_finalizadas_comuna_1.count()
+  monto_total_inversion_comuna_1 = obras_finalizadas_comuna_1.select(fn.SUM(Obra.monto_contrato)).scalar()
+
+  print("\nf. Cantidad de obras finalizadas y su monto total de inversión en la comuna 1:")
+  print(f"Cantidad de obras finalizadas en la comuna 1: {cantidad_obras_finalizadas_comuna_1}")
+  print(f"Monto total de inversión en la comuna 1: {monto_total_inversion_comuna_1}")
+
+def contar_obras_finalizadas_24_meses(self):
+  obras_finalizadas_24_meses = Obra.select().where((Obra.etapa == 'Finalizada') & (Obra.duracion <= 24)).count()
+  print("\ng. Cantidad de obras finalizadas en un plazo menor o igual a 24 meses:")
+  print(f"Cantidad de obras finalizadas en 24 meses o menos: {obras_finalizadas_24_meses}")
+
+def porcentaje_obras_finalizadas(self):
+  #porcentaje total de obras finalizadas
+  cantidad_obras_finalizadas = Obra.select().where(Obra.etapa == 'Finalizada')
+  total_obras = Obra.select().count()
+  porcentaje_obras_finalizadas = (cantidad_obras_finalizadas / total_obras) * 100
+
+  print("\nh. Porcentaje total de obras finalizadas:")
+  print(f"Porcentaje de obras finalizadas: {porcentaje_obras_finalizadas}%")
+
+def contar_mano_obra_total(self):
+  #cantidad total de mano de obra empleada
+  total_mano_obra = Obra.select(fn.SUM(Obra.mano_obra)).scalar()
+  print("\ni. Cantidad total de mano de obra empleada:")
+  print(f"Cantidad total de mano de obra: {total_mano_obra}")
+
+def calcular_monto_total_inversion(self):
+  #monto total de inversión
+  monto_total_inversion = Obra.select(fn.SUM(Obra.monto_contrato)).scalar()
+
+  print("\nj. Monto total de inversión:")
+  print(f"Monto total de inversión: {monto_total_inversion}")
 
