@@ -63,6 +63,7 @@ if __name__ == "__main__":
     GestionarObra.limpiar_datos()
     print(GestionarObra.cargar_datos()) 
         # Llamar al método de clase para obtener e imprimir los indicadores
+        #~comentario nuevo
     
     
     main_menu = Menu("Obras Urbanas Ciudad IFTS 18", menu_options)
